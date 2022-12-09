@@ -1,6 +1,6 @@
 # Generic FA2 and FA2.1
 
-This module is a implementation of the last [FA2.1 proposition](balance_of address old_value in).
+This module is a implementation of the last [FA2.1 proposition](https://hackmd.io/eOQdbL1MRlW62M6l6Tjp1Q#).
 
 The current implementation covers:
 - multi-asset,
