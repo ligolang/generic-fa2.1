@@ -1,16 +1,5 @@
 #import "../lib/contracts/fa2-NFT.mligo" "FA2_NFT"
-
-let nth_exn (type a) (i: int) (a: a list) : a =
-  let rec aux (remaining: a list) (cur: int) : a =
-    match remaining with 
-    [] -> 
-    failwith "Not found in list"
-    | hd :: tl -> 
-      if cur = i then 
-      hd 
-      else aux tl (cur + 1)
-  in
-  aux a 0  
+#import "helpers/list.mligo" "List_helper"
 
 module Callback = struct
   type storage = nat list
@@ -143,10 +132,10 @@ type main_fn = (FA2_NFT.parameter * FA2_NFT.storage) -> return
 (* 1. transfer successful *)
 let _test_atomic_tansfer_operator_success (main : main_fn) =
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let owner3 = nth_exn 2 owners in
-  let op1    = nth_exn 0 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let owner3 = List_helper.nth_exn 2 owners in
+  let op1    = List_helper.nth_exn 0 operators in
   let transfer_requests = [
     {from_=owner1; txs=[{to_=owner2;amount=1n;token_id=1n};]};
   ]
@@ -162,9 +151,9 @@ let test_atomic_tansfer_operator_success = _test_atomic_tansfer_operator_success
 (* 1.1. transfer successful owner *)
 let _test_atomic_tansfer_owner_success (main : main_fn) =
   let initial_storage, owners, _ = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let owner3 = nth_exn 2 owners in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let owner3 = List_helper.nth_exn 2 owners in
   let transfer_requests = [
     {from_=owner1; txs=[{to_=owner2;amount=1n;token_id=1n};]};
   ]
@@ -180,9 +169,9 @@ let test_atomic_tansfer_owner_success = _test_atomic_tansfer_owner_success FA2_N
 (* 2. transfer failure token undefined *)
 let _test_transfer_token_undefined (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let op1    = nth_exn 0 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let op1    = List_helper.nth_exn 0 operators in
   let transfer_requests = [
     {from_=owner1; txs=[{to_=owner2;amount=1n;token_id=15n};]};
   ]
@@ -197,9 +186,9 @@ let test_transfer_token_undefined = _test_transfer_token_undefined FA2_NFT.main
 (* 3. transfer failure incorrect operator *)
 let _test_atomic_transfer_failure_not_operator (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let op2    = nth_exn 1 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let op2    = List_helper.nth_exn 1 operators in
   let transfer_requests = [
     {from_=owner1; txs=[{to_=owner2;amount=1n;token_id=1n};]};
   ]
@@ -215,10 +204,10 @@ let test_atomic_transfer_failure_not_operator
 (* 4. self transfer *)
 let _test_atomic_tansfer_success_zero_amount_and_self_transfer (main : main_fn) =
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let owner3 = nth_exn 2 owners in
-  let op1    = nth_exn 0 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let owner3 = List_helper.nth_exn 2 owners in
+  let op1    = List_helper.nth_exn 0 operators in
   let transfer_requests = [
     {from_=owner2; txs=[{to_=owner2;amount=1n;token_id=2n};]};
   ]
@@ -235,9 +224,9 @@ let test_atomic_tansfer_success_zero_amount_and_self_transfer =
 (* 5. transfer failure transitive operators *)
 let _test_transfer_failure_transitive_operators (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let op3    = nth_exn 2 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let op3    = List_helper.nth_exn 2 operators in
   let transfer_requests = [
     {from_=owner1; txs=[{to_=owner2;amount=1n;token_id=1n};]};
   ]
@@ -274,9 +263,9 @@ let test_empty_transfer_and_balance_of = _test_empty_transfer_and_balance_of FA2
 (* 7. balance of failure token undefined *)
 let _test_balance_of_token_undefines (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let _op1   = nth_exn 0 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let _op1   = List_helper.nth_exn 0 operators in
   let (callback_addr,_,_) = Test.originate Callback.main ([] : nat list) 0tez in
   let callback_contract = Test.to_contract callback_addr in
 
@@ -298,8 +287,8 @@ let test_balance_of_token_undefines = _test_balance_of_token_undefines FA2_NFT.m
 (* 8. duplicate balance_of requests *)
 let _test_balance_of_requests_with_duplicates (main : main_fn) = 
   let initial_storage, owners, _ = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
   let (callback_addr,_,_) = Test.originate Callback.main ([] : nat list) 0tez in
   let callback_contract = Test.to_contract callback_addr in
 
@@ -325,9 +314,9 @@ let test_balance_of_requests_with_duplicates
 (* 9. 0 balance if does not hold any tokens (not in ledger) *)
 let _test_balance_of_0_balance_if_address_does_not_hold_tokens (main : main_fn) = 
     let initial_storage, owners, operators = get_initial_storage () in
-    let owner1 = nth_exn 0 owners in
-    let owner2 = nth_exn 1 owners in
-    let op1    = nth_exn 0 operators in
+    let owner1 = List_helper.nth_exn 0 owners in
+    let owner2 = List_helper.nth_exn 1 owners in
+    let op1    = List_helper.nth_exn 0 operators in
     let (callback_addr,_,_) = Test.originate Callback.main ([] : nat list) 0tez in
     let callback_contract = Test.to_contract callback_addr in
 
@@ -354,9 +343,9 @@ let test_balance_of_0_balance_if_address_does_not_hold_tokens =
 (* 10. Remove operator & do transfer - failure *)
 let _test_update_operator_remove_operator_and_transfer (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let op1    = nth_exn 0 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let op1    = List_helper.nth_exn 0 operators in
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
 
@@ -383,8 +372,8 @@ let test_update_operator_remove_operator_and_transfer =
 (* 10.1. Remove operator & do transfer - failure *)
 let _test_update_operator_remove_operator_and_transfer1 (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner4 = nth_exn 3 owners in
-  let op1    = nth_exn 0 operators in
+  let owner4 = List_helper.nth_exn 3 owners in
+  let op1    = List_helper.nth_exn 0 operators in
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
 
@@ -409,9 +398,9 @@ let test_update_operator_remove_operator_and_transfer1 =
 (* 11. Add operator & do transfer - success *)
 let _test_update_operator_add_operator_and_transfer (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let op3    = nth_exn 2 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let op3    = List_helper.nth_exn 2 operators in
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
 
@@ -438,9 +427,9 @@ let test_update_operator_add_operator_and_transfer =
 (* 11.1. Add operator & do transfer - success *)
 let _test_update_operator_add_operator_and_transfer1 (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner2 = nth_exn 1 owners in
-  let owner4 = nth_exn 3 owners in
-  let op3    = nth_exn 2 operators in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let owner4 = List_helper.nth_exn 3 owners in
+  let op3    = List_helper.nth_exn 2 operators in
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
 
@@ -466,9 +455,9 @@ let test_update_operator_add_operator_and_transfer1 =
 
 let _test_only_sender_manage_operators (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
-  let owner1 = nth_exn 0 owners in
-  let owner2 = nth_exn 1 owners in
-  let op3    = nth_exn 2 operators in
+  let owner1 = List_helper.nth_exn 0 owners in
+  let owner2 = List_helper.nth_exn 1 owners in
+  let op3    = List_helper.nth_exn 2 operators in
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
 

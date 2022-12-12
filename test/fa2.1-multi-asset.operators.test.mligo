@@ -1,4 +1,5 @@
 #import "../lib/contracts/fa2-multi-asset.mligo" "FA2_multi_asset"
+#import "helpers/list.mligo" "List_helper"
 
 module Callback = struct
   type storage = nat list
@@ -21,22 +22,6 @@ module Callback = struct
 end
 
 (* Tests for FA2 multi asset contract *)
-
-module List_helper = struct 
-
-  let nth_exn (type a) (i: int) (a: a list) : a =
-    let rec aux (remaining: a list) (cur: int) : a =
-      match remaining with 
-       [] -> 
-        failwith "Not found in list"
-      | hd :: tl -> 
-          if cur = i then 
-            hd 
-          else aux tl (cur + 1)
-    in
-    aux a 0  
-
-end
 
 let get_initial_storage (a, b, c : nat * nat * nat) = 
   let () = Test.reset_state 6n ([] : tez list) in
