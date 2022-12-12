@@ -4,16 +4,17 @@ ifndef LIGO
 LIGO=docker run -u $(id -u):$(id -g) --rm -v "$(PWD)":"$(PWD)" -w "$(PWD)" ligolang/ligo:next 
 endif
 
+PROTOCOL_OPT?=
+
 help:
 	@grep -E '^[ a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-test = @$(LIGO) run test $(project_root) ./test/$(1)
+test = @$(LIGO) run test ./test/$(1) $(PROTOCOL_OPT)
 
 .PHONY: test
 
-## run tests (SUITE=single_asset make test)
-test: 
+test: ## run tests (make test SUITE=fa2.1-single-asset.operators)
 ifndef SUITE
 	@$(call test,fa2-single-asset.test.mligo)
 	@$(call test,fa2-multi-asset.test.mligo)
