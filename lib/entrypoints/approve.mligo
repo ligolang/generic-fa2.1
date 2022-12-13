@@ -14,8 +14,8 @@ type approve = [@layout:comb] {
       new_value : nat;
    }   
 
-type approvements = approve list
-type t = approvements
+type approvals = approve list
+type t = approvals
 
 let approve 
          (approve: approve) 
@@ -29,12 +29,12 @@ let approve
 
 let approve 
          (type a k v) 
-         (approvements: approvements) 
+         (to_approve: approvals) 
          (storage: (a, k, v) storage) 
          : operation list * (a, k, v) storage =
    let approvals = List.fold_left (fun (approvals,a) -> approve a approvals) 
-                                  (Storage.get_approvals storage) approvements in
+                                  (Storage.get_approvals storage) to_approve in
    let storage = Storage.set_approvals storage approvals in
-   let message = Event.make_event approvements in
+   let message = Event.make_event to_approve in
    let event = Tezos.emit "%approval_event" message in
    [ event ], storage

@@ -9,13 +9,13 @@ type approve = {
     new_value : nat;
 } 
 
-type approvements = approve list
+type approvals = approve list
 
-type t = {
+type approval_event = {
     sender         : address;
-    operator_update: approvements; 
+    approval_update: approvals; 
 }
 
-let make_event (operator_update:approvements) = 
+let make_event (approval_update:approvals): approval_event = 
     let sender = Tezos.get_sender () in 
-    { sender; operator_update }
+    { sender; approval_update }

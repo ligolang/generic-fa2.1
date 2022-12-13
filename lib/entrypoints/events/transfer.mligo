@@ -12,7 +12,7 @@ type transfer = {
     txs   : transaction list;
 }
 
-type t = {
+type transfer_event = {
     sender  : address;
     transfer: transfer list;
 }
@@ -23,6 +23,6 @@ let make_transaction (to_: address option) (token_id: Token.t) (amount: Amount.t
 let make_transfer (from_:address option) (txs: transaction list): transfer = 
     { from_; txs}
 
-let make_event (transfer: transfer list): t =
+let make_event (transfer: transfer list): transfer_event =
     let sender = Tezos.get_sender () in
     { sender; transfer }

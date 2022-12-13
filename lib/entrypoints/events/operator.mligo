@@ -8,14 +8,14 @@ type operator_update = [@layout:comb] {
     is_operator : bool;
 } 
 
-type t = [@layout:comb] {
+type operator_update_event = [@layout:comb] {
     sender         : address;
     operator_update: operator_update list; 
 }
 
-let make_update (owner:address) (operator:address) (token_id:Token.t) (is_operator:bool) =
+let make_update (owner:address) (operator:address) (token_id:Token.t) (is_operator:bool): operator_update  =
     { owner; operator; token_id; is_operator }
 
-let make_event (operator_update:operator_update list) = 
+let make_event (operator_update:operator_update list): operator_update_event = 
     let sender = Tezos.get_sender () in 
     { sender; operator_update }
