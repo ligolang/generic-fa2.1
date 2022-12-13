@@ -39,10 +39,10 @@ let update_ops
    updates, operators
    
 let update_ops 
-         (type a k v) 
+         (type a l) 
          (updates: update_operators) 
-         (storage: (a,k,v) storage) 
-         : operation list * (a,k,v) storage =   
+         (storage: (a,l) storage) 
+         : operation list * (a,l) storage =   
    match Storage.get_operators storage with
    | Some operators -> 
          let updates, operators = update_ops updates operators in 

@@ -28,10 +28,10 @@ let approve
    approvals
 
 let approve 
-         (type a k v) 
+         (type a l) 
          (to_approve: approvals) 
-         (storage: (a, k, v) storage) 
-         : operation list * (a, k, v) storage =
+         (storage: (a, l) storage) 
+         : operation list * (a, l) storage =
    let approvals = List.fold_left (fun (approvals,a) -> approve a approvals) 
                                   (Storage.get_approvals storage) to_approve in
    let storage = Storage.set_approvals storage approvals in

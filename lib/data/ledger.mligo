@@ -4,114 +4,166 @@
 
 type owner = address
 
-type ('k,'v) t = ('k,'v) big_map
-
-type ('k,'v) ledger_module = { 
-    data: ('k,'v) t; 
-    make_key  : address -> Token.t -> 'k;
-    add_to_val: address -> nat -> 'v option -> 'v option;
-    sub_to_val: address -> nat -> 'v option -> 'v option;
-    balance_of: address -> 'v option -> nat;
+type 'l ledger_module = { 
+    data      : 'l; 
+    empty     : 'l;
+    increase  : 'l * owner * Token.t * Amount.t -> 'l;
+    decrease  : 'l * owner * Token.t * Amount.t -> 'l;
+    balance_of: 'l * owner * Token.t -> Amount.t;
+    // supply  : Token.t -> Amount.t
 }
 
-let get_for_user 
-      (type k v) 
-      (ledger_module: (k,v) ledger_module) 
-      (owner: owner) 
-      (token_id: Token.t) 
-      : v option =
-  let key = ledger_module.make_key owner token_id in
-  Big_map.find_opt key ledger_module.data
-
-let set_for_user 
-      (type k v) 
-      (ledger_module: (k,v) ledger_module) 
-      (owner: owner) 
-      (token_id: Token.t) 
-      (value:v option) 
-      : (k,v) ledger_module =
-  let key = ledger_module.make_key owner token_id in
-  let data = Big_map.update key value ledger_module.data in
-  { ledger_module with data }
-
+[@inline]
 let decrease_token_amount_for_user 
-      (type k v) 
-      (ledger_module: (k,v) ledger_module) 
+      (type l) 
+      (ledger_module: l ledger_module) 
       (from_: owner) 
       (token_id: Token.t) 
       (amount_:nat)
-      : (k,v) ledger_module =
-  let balance_ = get_for_user ledger_module from_ token_id in
-  let balance_ = ledger_module.sub_to_val from_ amount_ balance_ in
-  let ledger   = set_for_user ledger_module from_ token_id balance_ in
-  ledger
+      : l ledger_module =
+  let data = ledger_module.decrease (ledger_module.data, from_, token_id, amount_) in
+  { ledger_module with data }
 
+[@inline]
 let increase_token_amount_for_user 
-      (type k v) 
-      (ledger_module: (k,v) ledger_module) 
+      (type l) 
+      (ledger_module: l ledger_module) 
       (to_: owner) 
       (token_id: Token.t)
       (amount_:nat)
-      : (k,v) ledger_module =
-  let balance_ = get_for_user ledger_module to_ token_id in
-  let balance_ = ledger_module.add_to_val to_ amount_ balance_ in
-  let ledger   = set_for_user ledger_module to_ token_id balance_ in
-  ledger
+      : l ledger_module =
+  let data = ledger_module.increase (ledger_module.data, to_, token_id, amount_) in
+  { ledger_module with data }
 
 (* Possible types as defined in the TZIP-12 *)
 
-type ledger = t
+module Common_Asset = struct 
+  let balance_of (value:Amount.t option) = 
+      match value with None -> 0n | Some v -> v 
+
+  let add_to_val (amount_:Amount.t) (old_value:Amount.t option) = 
+      let old_value = balance_of old_value in
+      Some (old_value + amount_)
+
+  let sub_to_val (amount_:Amount.t) (old_value:Amount.t option) = 
+      let old_value = balance_of old_value in
+      let () = assert_with_error (old_value >= amount_) Errors.ins_balance in
+      Some (abs (old_value - amount_))
+end
 
 module Single_asset = struct 
-  type k = address
-  type v = Amount.t
-  type t = (k,v) ledger
+  type l = (address,Amount.t) big_map
+
+  let empty = (Big_map.empty : l)
+
   let make_key (a:address) (_: Token.t) = a
-  let balance_of (_:address) (value:v option) = 
-      match value with None -> 0n | Some v -> v 
-  let add_to_val (address:address) (amount_:Amount.t) (old_value:v option) = 
-      let old_value = balance_of address old_value in
-      Some (old_value + amount_)
-  let sub_to_val (address:address) (amount_:Amount.t) (old_value:v option) = 
-      let old_value = balance_of address old_value in
-      let () = assert_with_error (old_value >= amount_) Errors.ins_balance in
-      Some (abs (old_value - amount_))
-  let ledger_module (data: (k,v) ledger) : (k,v) ledger_module = { 
-        data; make_key; add_to_val; sub_to_val; balance_of 
-      }
+
+  let get_for_user (ledger: l) (owner: owner) (token_id: Token.t): Amount.t option =
+    let key = make_key owner token_id in
+    Big_map.find_opt key ledger
+
+  let set_for_user (ledger: l) (owner: owner) (token_id: Token.t) (value: Amount.t option): l =
+    let key = make_key owner token_id in
+    Big_map.update key value ledger
+
+  let decrease (ledger,from_,token_id,amount_: l * owner * Token.t * Amount.t): l =
+    let balance_ = get_for_user ledger from_ token_id in
+    let balance_ = Common_Asset.sub_to_val amount_ balance_ in
+    let ledger   = set_for_user ledger from_ token_id balance_ in
+    ledger
+
+  let increase (ledger,to_,token_id,amount_: l * owner * Token.t * Amount.t): l =
+    let balance_ = get_for_user ledger to_ token_id in
+    let balance_ = Common_Asset.add_to_val amount_ balance_ in
+    let ledger   = set_for_user ledger to_ token_id balance_ in
+    ledger
+
+  let balance_of (ledger,owner,token_id: l * owner * Token.t): Amount.t =
+    let value = get_for_user ledger owner token_id in
+    Common_Asset.balance_of value
+
+  let ledger_module (data: l) : l ledger_module = { 
+    data; empty; increase; decrease; balance_of
+  }
 end
 
-module Multi_asset = struct
-  type k = address * Token.t
-  type v = Amount.t
-  type t = (k,v) t
-  let make_key (a:address) (t: Token.t) = a,t
-  let balance_of (_:address) (value:v option) = 
-      match value with None -> 0n | Some v -> v 
-  let add_to_val (address:address) (amount_:Amount.t) (old_value:v option) = 
-      let old_value = balance_of address old_value in
-      Some (old_value + amount_)
-  let sub_to_val (address:address) (amount_:Amount.t) (old_value:v option) = 
-      let old_value = balance_of address old_value in
-      let () = assert_with_error (old_value >= amount_) Errors.ins_balance in
-      Some (abs (old_value - amount_))
-  let ledger_module (data: (k,v) ledger) : (k,v) ledger_module = { 
-        data; make_key; add_to_val; sub_to_val; balance_of 
-      }
+module Multi_asset = struct 
+  type l = ((address * Token.t),Amount.t) big_map
+
+  let empty = (Big_map.empty : l)
+
+  let make_key (a:address) (t: Token.t) = (a,t)
+
+  let get_for_user (ledger: l) (owner: owner) (token_id: Token.t): Amount.t option =
+    let key = make_key owner token_id in
+    Big_map.find_opt key ledger
+
+  let set_for_user (ledger: l) (owner: owner) (token_id: Token.t) (value: Amount.t option): l =
+    let key = make_key owner token_id in
+    Big_map.update key value ledger
+
+  let decrease (ledger,from_,token_id,amount_: l * owner * Token.t * Amount.t): l =
+    let balance_ = get_for_user ledger from_ token_id in
+    let balance_ = Common_Asset.sub_to_val amount_ balance_ in
+    let ledger   = set_for_user ledger from_ token_id balance_ in
+    ledger
+
+  let increase (ledger,to_,token_id,amount_: l * owner * Token.t * Amount.t): l =
+    let balance_ = get_for_user ledger to_ token_id in
+    let balance_ = Common_Asset.add_to_val amount_ balance_ in
+    let ledger   = set_for_user ledger to_ token_id balance_ in
+    ledger
+
+  let balance_of (ledger,owner,token_id: l * owner * Token.t): Amount.t =
+    let value = get_for_user ledger owner token_id in
+    Common_Asset.balance_of value
+
+  let ledger_module (data: l) : l ledger_module = { 
+    data; empty; increase; decrease; balance_of
+  }
 end
 
-module NFT = struct
-  type k = Token.t
-  type v = address * Amount.t
-  type t = (k,v) t
-  let make_key (_address:address) (t: Token.t) = t
-  let balance_of (address:address) (value:v option) = 
-      match value with None -> 0n | Some (own,amount) -> if (own = address) then amount else 0n
-  let add_to_val (address:address) (amount:Amount.t) (_old_value:v option) = 
-        if amount = 1n then Some (address,amount) else failwith Errors.amount_net_expected
-  let sub_to_val (_address:address) (amount :Amount.t) (_old_value:v option) = 
-        if amount = 1n then (None:v option) else failwith Errors.amount_net_expected        
-  let ledger_module (data: (k,v) ledger) : (k,v) ledger_module = { 
-        data; make_key; add_to_val; sub_to_val; balance_of 
-      }
+module NFT = struct 
+  type l = (Token.t,address) big_map
+
+  let empty = (Big_map.empty : l)
+
+  let make_key (_:address) (t: Token.t) = t
+
+  let balance_of (address:address) (value:owner option) = 
+      match value with None -> 0n | Some own -> if (own = address) then 1n else 0n
+
+  let add_to_val (address:address) (amount:Amount.t) (_old_value:owner option) = 
+        if amount = 1n then Some address else failwith Errors.amount_net_expected
+
+  let sub_to_val (_address:address) (amount :Amount.t) (_old_value:owner option) = 
+        if amount = 1n then (None:owner option) else failwith Errors.amount_net_expected        
+
+  let get_for_user (ledger: l) (owner: owner) (token_id: Token.t): owner option =
+    let key = make_key owner token_id in
+    Big_map.find_opt key ledger
+
+  let set_for_user (ledger: l) (owner: owner) (token_id: Token.t) (_value: owner option): l =
+    let key = make_key owner token_id in
+    Big_map.update key (Some owner) ledger
+
+  let decrease (ledger,from_,token_id,amount_: l * owner * Token.t * Amount.t): l =
+    let balance_ = get_for_user ledger from_ token_id in
+    let balance_ = sub_to_val from_ amount_ balance_ in
+    let ledger   = set_for_user ledger from_ token_id balance_ in
+    ledger
+
+  let increase (ledger,to_,token_id,amount_: l * owner * Token.t * Amount.t): l =
+    let balance_ = get_for_user ledger to_ token_id in
+    let balance_ = add_to_val to_ amount_ balance_ in
+    let ledger   = set_for_user ledger to_ token_id balance_ in
+    ledger
+
+  let balance_of (ledger,owner,token_id: l * owner * Token.t): Amount.t =
+    let value = get_for_user ledger owner token_id in
+    balance_of owner value
+
+  let ledger_module (data: l) : l ledger_module = { 
+    data; empty; increase; decrease; balance_of
+  }
 end

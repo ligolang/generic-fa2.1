@@ -31,11 +31,11 @@ type 'a parameter = [@layout:comb]
    | Extension        of 'a
 
 let main 
-         (type p a k v) 
-         (make:(k,v) ledger -> (k,v) ledger_module) 
-         (extension:a -> (a,k,v) storage -> (k,v) ledger_module -> operation list * (a,k,v) storage)
-         ((p,s):(p parameter * (a,k,v) storage)) 
-         : operation list * (a,k,v) storage = 
+         (type p a l) 
+         (make:(l) ledger -> l ledger_module) 
+         (extension:a -> (a,l) storage -> l ledger_module -> operation list * (a,l) storage)
+         ((p,s):(p parameter * (a,l) storage)) 
+         : operation list * (a,l) storage = 
    match p with
    | Transfer         p -> Transfer.transfer p s (make s.ledger)
    | Balance_of       p -> Balance_of.balance_of p s (make s.ledger)

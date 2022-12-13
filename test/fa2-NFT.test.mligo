@@ -49,11 +49,11 @@ let get_initial_storage () =
 
   let ops = [op1; op2; op3] in
     let ledger = Big_map.literal ([
-    (1n, (owner1, 1n));
-    (2n, (owner2, 1n));
-    (3n, (owner3, 1n));
-    (4n, (owner4, 1n));
-    (5n, (owner4, 1n));
+    (1n, owner1);
+    (2n, owner2);
+    (3n, owner3);
+    (4n, owner4);
+    (5n, owner4);
   ])
   in
 
@@ -103,15 +103,15 @@ let assert_balances
   let storage = Test.get_storage contract_address in
   let ledger = storage.ledger in
   let () = match (Big_map.find_opt token_id_1 ledger) with
-    Some (amt,_) -> assert (amt = owner1)
+    Some amt -> assert (amt = owner1)
   | None -> Test.failwith "incorret address" 
   in
   let () = match (Big_map.find_opt token_id_2 ledger) with
-    Some (amt,_) ->  assert (amt = owner2)
+    Some amt ->  assert (amt = owner2)
   | None -> Test.failwith "incorret address" 
   in
   let () = match (Big_map.find_opt token_id_3 ledger) with
-    Some (amt,_) -> assert (amt = owner3)
+    Some amt -> assert (amt = owner3)
   | None -> Test.failwith "incorret address" 
   in
   ()

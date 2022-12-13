@@ -21,12 +21,11 @@ type transfer_from = {
 type transfer = transfer_from list
 
 type t = transfer
-type ledger = Ledger.t
 type ledger_module = Ledger.ledger_module
 
 let authorize_transfer 
-         (type a k v) 
-         (storage: (a,k,v) storage) 
+         (type a l) 
+         (storage: (a,l) storage) 
          (approvals:Approvals.t) 
          (from_: address) 
          (token_id: Token.t) 
@@ -37,11 +36,11 @@ let authorize_transfer
    | None           -> Approvals.decrease_approved_amount approvals from_ (Tezos.get_sender ()) token_id amount
 
 let atomic_trans 
-         (type a k v) 
-         (storage: (a,k,v) storage) 
+         (type a l) 
+         (storage: (a,l) storage) 
          (from_:address) 
-         ((ledger, approvals), transfer:((k,v) ledger_module * Approvals.t) * atomic_trans)
-         : (k,v) ledger_module * Approvals.t =
+         ((ledger, approvals), transfer:(l ledger_module * Approvals.t) * atomic_trans)
+         : l ledger_module * Approvals.t =
    let { to_; token_id; amount = amount_ } = transfer in
    let ()        = Storage.assert_token_exist storage token_id in
    let approvals = authorize_transfer storage approvals from_ token_id amount_ in
@@ -50,19 +49,19 @@ let atomic_trans
    ledger, approvals
 
 let transfer_from 
-      (type a k v) 
-      (storage: (a,k,v) storage) 
-      ((ledger, approvals), transfer : ((k,v) ledger_module * Approvals.t) * transfer_from)
-      : (k,v) ledger_module * Approvals.t =
+      (type a l) 
+      (storage: (a,l) storage) 
+      ((ledger, approvals), transfer : (l ledger_module * Approvals.t) * transfer_from)
+      : l ledger_module * Approvals.t =
    let { from_; txs } = transfer in 
    List.fold_left (atomic_trans storage from_) (ledger, approvals) txs
 
 let transfer 
-      (type a k v) 
+      (type a l) 
       (transfer: transfer) 
-      (storage: (a,k,v) storage) 
-      (ledger:(k,v) ledger_module)
-      : operation list * (a,k,v) storage =
+      (storage: (a,l) storage) 
+      (ledger: l ledger_module)
+      : operation list * (a,l) storage =
    let approvals = Storage.get_approvals storage in
    let ledger,approvals = List.fold_left (transfer_from storage) (ledger, approvals) transfer in
    let storage = Storage.set_approvals storage approvals in

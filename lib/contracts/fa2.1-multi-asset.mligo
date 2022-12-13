@@ -13,7 +13,7 @@ type parametric_parameter = FA2_1.parameter
 type parametric_storage = Storage.t
 
 type parameter = unit parametric_parameter
-type storage = (unit, Ledger.Multi_asset.k, Ledger.Multi_asset.v) parametric_storage
+type storage = (unit, Ledger.Multi_asset.l) parametric_storage
 
 let main : (parameter * storage) -> operation list * storage = 
    FA2_1.main Ledger.Multi_asset.ledger_module (fun _ s _ -> [],s)

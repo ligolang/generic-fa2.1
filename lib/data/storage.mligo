@@ -6,40 +6,38 @@
 #import "tokenMetadata.mligo" "TokenMetadata"
 #import "ledger.mligo" "Ledger"
 
-type ledger = Ledger.t
-
-type ('a,'k,'v) t = {
+type ('a,'l) t = {
   metadata: Metadata.t;
-  ledger: ('k,'v) ledger;
+  ledger: 'l;
   token_metadata: TokenMetadata.t;
   operators: Operators.t option;
   approvals: Approvals.t; 
   extension: 'a;
 }
 
-let token_exist (type a k v) (s:(a,k,v) t) (token_id : nat) : bool  = 
+let token_exist (type a l) (s:(a,l) t) (token_id : nat) : bool  = 
     match Big_map.find_opt token_id s.token_metadata with
     | Some _ -> true
     | None   -> false
 
-let assert_token_exist (type a k v) (s:(a,k,v) t) (token_id : Token.t) : unit  =
+let assert_token_exist (type a l) (s:(a,l) t) (token_id : Token.t) : unit  =
     if not (token_exist s token_id)
     then failwith Errors.undefined_token
 
-let get_ledger (type a k v) (s:(a,k,v) t) = 
+let get_ledger (type a l) (s:(a,l) t) = 
     s.ledger
 
-let set_ledger (type a k v) (s:(a,k,v) t) (ledger: (k,v) ledger) = 
+let set_ledger (type a l) (s:(a,l) t) (ledger: l) = 
     {s with ledger = ledger}
 
-let get_operators (type a k v) (s:(a,k,v) t) = 
+let get_operators (type a l) (s:(a,l) t) = 
     s.operators
 
-let set_operators (type a k v) (s:(a,k,v) t) (operators:Operators.t) = 
+let set_operators (type a l) (s:(a,l) t) (operators:Operators.t) = 
     {s with operators = Some operators}
 
-let get_approvals (type a k v) (s:(a,k,v) t) = 
+let get_approvals (type a l) (s:(a,l) t) = 
     s.approvals
 
-let set_approvals (type a k v) (s:(a,k,v) t) (approvals:Approvals.t) =
+let set_approvals (type a l) (s:(a,l) t) (approvals:Approvals.t) =
     {s with approvals = approvals}

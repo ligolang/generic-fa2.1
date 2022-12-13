@@ -27,14 +27,13 @@ type export_ticket = export_tickets_to list
 
 type t = export_ticket
 
-type ledger = Ledger.t
 type ledger_module = Ledger.ledger_module
 
 let create_ticket 
-            (type k v) 
+            (type l) 
             (ticket_to_export: ticket_to_export)
-            (ledger: (k,v) ledger_module)
-            : (Event.transfer * exported_ticket * (k,v) ledger_module ) = 
+            (ledger: l ledger_module)
+            : (Event.transfer * exported_ticket * l ledger_module ) = 
    let { from_; token_id; amount } = ticket_to_export in
    let ledger = Ledger.decrease_token_amount_for_user ledger from_ token_id amount in
    let ticket = Tezos.create_ticket (token_id, None) amount in
@@ -44,11 +43,11 @@ let create_ticket
    transfer, ticket, ledger
 
 let create_tickets 
-            (type k v) 
+            (type l) 
             (tickets_to_export: ticket_to_export list) 
             (transfers: Event.transfer list)
-            (ledger:(k, v) ledger_module)
-            : (Event.transfer list * exported_ticket list * (k,v) ledger_module) = 
+            (ledger: l ledger_module)
+            : (Event.transfer list * exported_ticket list * l ledger_module) = 
    List.fold_left (fun ((ltr,lt,l),tk) -> let (tr,t,l) = create_ticket tk l in (tr::ltr,t::lt,l)) 
                   (transfers, [], ledger) tickets_to_export
 
@@ -65,21 +64,21 @@ let send_tickets_to
       Tezos.transaction tickets 0tez contract :: ops
 
 let export_ticket_to 
-            (type k v) 
+            (type l) 
             (export_tickets_to: export_tickets_to) 
-            (transfers, ops, ledger: Event.transfer list * operation list * (k,v) ledger_module)
-            : (Event.transfer list * operation list * (k,v) ledger_module) = 
+            (transfers, ops, ledger: Event.transfer list * operation list * l ledger_module)
+            : (Event.transfer list * operation list * l ledger_module) = 
    let { destination; tickets_to_export } = export_tickets_to in
    let transfers, tickets, ledger = create_tickets tickets_to_export transfers ledger in
    let ops = send_tickets_to destination tickets ops in
    transfers, ops, ledger
 
 let export_tickets
-            (type a k v) 
+            (type a l) 
             (export_ticket: export_ticket) 
-            (storage: (a,k,v) storage) 
-            (ledger_module: (k,v) ledger_module) 
-            : operation list * (a,k,v) storage =
+            (storage: (a,l) storage) 
+            (ledger_module: l ledger_module) 
+            : operation list * (a,l) storage =
    let transfers, ops, l = List.fold_left (fun (r,t) -> export_ticket_to t r) 
                                ([], [], ledger_module) export_ticket in
    let message = Event.make_event transfers in
