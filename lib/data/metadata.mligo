@@ -21,8 +21,8 @@ let metadata = [%bytes
 	"version":"1.0.0",
 	"license":{"name":"MIT"},
 	"authors":[
-		
-		"Didier Plaindoux<d.plaindoux@free.fr>"
+		"Melwyn Saldanha <melwyn95@gmail.com>",
+		"Didier Plaindoux <d.plaindoux@free.fr>"
 	],
 	"homepage":"",
 	"source":{"tools":["Ligo"], "location":"https://github.com/ligolang/generic-fa2.1"},
