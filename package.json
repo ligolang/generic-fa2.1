@@ -1,0 +1,21 @@
+{
+  "name": "ligo-generic-fa2.1",
+  "version": "1.0.0",
+  "description": "An implementation of generic FA2.1 token",
+  "main": "lib/contracts/fa2.1-generic.mligo",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ligolang/generic-fa2.1"
+  },
+  "keywords": [],
+  "author": "ligoLANG <https://ligolang.org/>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ligolang/generic-fa2.1/issues"
+  },
+  "homepage": "https://github.com/ligolang/generic-fa2.1#readme"
+}
