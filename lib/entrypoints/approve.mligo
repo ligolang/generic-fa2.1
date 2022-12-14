@@ -35,6 +35,5 @@ let approve
    let approvals = List.fold_left (fun (approvals,a) -> approve a approvals) 
                                   (Storage.get_approvals storage) to_approve in
    let storage = Storage.set_approvals storage approvals in
-   let message = Event.make_event to_approve in
-   let event = Tezos.emit "%approval_event" message in
+   let event = Event.make_event to_approve in
    [ event ], storage

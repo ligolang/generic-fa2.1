@@ -16,6 +16,6 @@ type operator_update_event = [@layout:comb] {
 let make_update (owner:address) (operator:address) (token_id:Token.t) (is_operator:bool): operator_update  =
     { owner; operator; token_id; is_operator }
 
-let make_event (operator_update:operator_update list): operator_update_event = 
+let make_event (operator_update:operator_update list): operation = 
     let sender = Tezos.get_sender () in 
-    { sender; operator_update }
+    Tezos.emit "%operator_update_event" { sender; operator_update }

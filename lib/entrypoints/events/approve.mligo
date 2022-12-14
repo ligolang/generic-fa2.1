@@ -1,7 +1,7 @@
 #import "../../data/token.mligo" "Token"
 #import "../../data/amount.mligo" "Amount"
 
-type approve = {
+type approve = [@layout:comb] {
     owner     : address;
     spender   : address;
     token_id  : Token.t;
@@ -11,11 +11,11 @@ type approve = {
 
 type approvals = approve list
 
-type approval_event = {
+type approval_event = [@layout:comb] {
     sender         : address;
     approval_update: approvals; 
 }
 
-let make_event (approval_update:approvals): approval_event = 
+let make_event (approval_update:approvals): operation = 
     let sender = Tezos.get_sender () in 
-    { sender; approval_update }
+    Tezos.emit "%approval_event" { sender; approval_update }

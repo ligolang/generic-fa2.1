@@ -6,7 +6,7 @@
 
 type storage = Storage.t
 
-type exported_ticket = (nat * bytes option) ticket 
+type exported_ticket = (Token.t * bytes option) ticket 
 
 type ticket_to_export = [@layout:comb] {
       from_ : address;
@@ -24,7 +24,6 @@ type export_tickets_to = [@layout:comb] {
    }
 
 type export_ticket = export_tickets_to list
-
 type t = export_ticket
 
 type ledger_module = Ledger.ledger_module
@@ -81,6 +80,5 @@ let export_tickets
             : operation list * (a,l) storage =
    let transfers, ops, l = List.fold_left (fun (r,t) -> export_ticket_to t r) 
                                ([], [], ledger_module) export_ticket in
-   let message = Event.make_event transfers in
-   let event = Tezos.emit "%transfer_event" message in
+   let event = Event.make_event transfers in
    event :: ops, Storage.set_ledger storage l.data

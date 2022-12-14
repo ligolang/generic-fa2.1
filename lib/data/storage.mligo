@@ -16,9 +16,7 @@ type ('a,'l) t = {
 }
 
 let token_exist (type a l) (s:(a,l) t) (token_id : nat) : bool  = 
-    match Big_map.find_opt token_id s.token_metadata with
-    | Some _ -> true
-    | None   -> false
+    Big_map.mem token_id s.token_metadata
 
 let assert_token_exist (type a l) (s:(a,l) t) (token_id : Token.t) : unit  =
     if not (token_exist s token_id)

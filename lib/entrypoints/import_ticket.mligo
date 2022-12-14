@@ -54,6 +54,5 @@ let import_tickets
             : operation list * (a,l) storage =
     let transfers, ledger = List.fold_left (fun (r,t) -> import_tickets_to t r) 
                                      ([], ledger_module) import_ticket in
-    let message = Event.make_event transfers in
-    let event = Tezos.emit "%transfer_event" message in
+    let event = Event.make_event transfers in
     [ event ], Storage.set_ledger storage ledger.data

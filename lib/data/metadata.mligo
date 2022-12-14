@@ -20,7 +20,10 @@ let metadata = [%bytes
 	"description":"FA2.1 implementation",
 	"version":"1.0.0",
 	"license":{"name":"MIT"},
-	"authors":["Didier Plaindoux<d.plaindoux@free.fr>"],
+	"authors":[
+		
+		"Didier Plaindoux<d.plaindoux@free.fr>"
+	],
 	"homepage":"",
 	"source":{"tools":["Ligo"], "location":"https://github.com/ligolang/generic-fa2.1"},
 	"interfaces":["TZIP-012"],

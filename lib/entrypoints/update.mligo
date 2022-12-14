@@ -2,7 +2,7 @@
 #import "../data/operators.mligo" "Operators"
 #import "../data/ledger.mligo" "Ledger"
 #import "../data/storage.mligo" "Storage"
-#import "./events/operator.mligo" "Event"
+#import "./events/update_operators.mligo" "Event"
 
 type storage = Storage.t
 
@@ -26,11 +26,11 @@ let update_ops
          : Event.operator_update list * Operators.t =
    let update_operator ((updates,operators),update : (Event.operator_update list * Operators.t) * unit_update) = 
       match update with
-      | Add_operator {owner=owner;operator=operator;token_id=token_id} -> 
+      | Add_operator { owner ; operator ; token_id } -> 
             let operators = Operators.add_operator operators owner operator token_id in
             let update = Event.make_update owner operator token_id true in
             update :: updates, operators
-      | Remove_operator {owner=owner;operator=operator;token_id=token_id} ->          
+      | Remove_operator { owner ; operator ; token_id} ->          
             let operators = Operators.remove_operator operators owner operator token_id in 
             let update = Event.make_update owner operator token_id false in
             update :: updates, operators
@@ -47,7 +47,6 @@ let update_ops
    | Some operators -> 
          let updates, operators = update_ops updates operators in 
          let storage = Storage.set_operators storage operators in
-         let message = Event.make_event updates in
-         let event = Tezos.emit "%operator_update_event" message in
+         let event = Event.make_event updates in
          [ event ], storage 
    | None -> failwith Errors.storage_has_no_operators
