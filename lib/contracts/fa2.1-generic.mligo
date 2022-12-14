@@ -18,22 +18,21 @@
 
 type storage = Storage.t
 
-type ledger = Ledger.t
 type ledger_module = Ledger.ledger_module
 
 type 'a parameter = [@layout:comb]
    | Transfer         of Transfer.transfer
    | Balance_of       of Balance_of.balance_of
    | Update_operators of Update.update_operators
-   | Approve          of Approve.approvements
+   | Approve          of Approve.approvals
    | Export_ticket    of Export_ticket.export_ticket
    | Import_ticket    of Import_ticket.import_ticket
    | Extension        of 'a
 
 let main 
          (type p a l) 
-         (make:(l) ledger -> l ledger_module) 
-         (extension:a -> (a,l) storage -> l ledger_module -> operation list * (a,l) storage)
+         (make:l -> l ledger_module) 
+         (extension:p -> (a,l) storage -> l ledger_module -> operation list * (a,l) storage)
          ((p,s):(p parameter * (a,l) storage)) 
          : operation list * (a,l) storage = 
    match p with
@@ -44,3 +43,4 @@ let main
    | Export_ticket    p -> Export_ticket.export_tickets p s (make s.ledger)
    | Import_ticket    p -> Import_ticket.import_tickets p s (make s.ledger)
    | Extension        p -> extension p s (make s.ledger)
+

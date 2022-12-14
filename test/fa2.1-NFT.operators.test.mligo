@@ -1,4 +1,4 @@
-#import "../lib/contracts/fa2-NFT.mligo" "FA2_NFT"
+#import "../lib/contracts/fa2.1-NFT.mligo" "FA2_1_NFT"
 #import "helpers/list.mligo" "List_helper"
 
 module Callback = struct
@@ -68,17 +68,17 @@ let get_initial_storage () =
   in
   
   let token_metadata = (Big_map.literal [
-    (1n, ({token_id=1n;token_info=(Map.empty : (string, bytes) map);} : FA2_NFT.TokenMetadata.data));
-    (2n, ({token_id=2n;token_info=(Map.empty : (string, bytes) map);} : FA2_NFT.TokenMetadata.data));
-    (3n, ({token_id=3n;token_info=(Map.empty : (string, bytes) map);} : FA2_NFT.TokenMetadata.data));
-    (4n, ({token_id=3n;token_info=(Map.empty : (string, bytes) map);} : FA2_NFT.TokenMetadata.data));
-    (5n, ({token_id=3n;token_info=(Map.empty : (string, bytes) map);} : FA2_NFT.TokenMetadata.data));
-  ] : FA2_NFT.TokenMetadata.t) in
+    (1n, ({token_id=1n;token_info=(Map.empty : (string, bytes) map);} : FA2_1_NFT.TokenMetadata.data));
+    (2n, ({token_id=2n;token_info=(Map.empty : (string, bytes) map);} : FA2_1_NFT.TokenMetadata.data));
+    (3n, ({token_id=3n;token_info=(Map.empty : (string, bytes) map);} : FA2_1_NFT.TokenMetadata.data));
+    (4n, ({token_id=3n;token_info=(Map.empty : (string, bytes) map);} : FA2_1_NFT.TokenMetadata.data));
+    (5n, ({token_id=3n;token_info=(Map.empty : (string, bytes) map);} : FA2_1_NFT.TokenMetadata.data));
+  ] : FA2_1_NFT.TokenMetadata.t) in
 
-  let approvals = (Big_map.empty : FA2_NFT.Approvals.t)
+  let approvals = (Big_map.empty : FA2_1_NFT.Approvals.t)
   in
 
-  let metadata = FA2_NFT.Metadata.init() in
+  let metadata = FA2_1_NFT.Metadata.init() in
   let _token_ids = Set.literal [1n; 2n; 3n] in
 
   let initial_storage = {
@@ -91,11 +91,11 @@ let get_initial_storage () =
     extension      = ()
   } in
 
-  (initial_storage:FA2_NFT.storage), owners, ops
+  (initial_storage:FA2_1_NFT.storage), owners, ops
 
 
 let assert_balances 
-  (contract_address : (FA2_NFT.parameter, FA2_NFT.storage) typed_address ) 
+  (contract_address : (FA2_1_NFT.parameter, FA2_1_NFT.storage) typed_address ) 
   (a, b, c : (address * nat) * (address * nat) * (address * nat)) = 
   let (owner1, token_id_1) = a in
   let (owner2, token_id_2) = b in
@@ -116,7 +116,7 @@ let assert_balances
   in
   ()
 
-let assert_error (result : test_exec_result) (error : FA2_NFT.Errors.t) =
+let assert_error (result : test_exec_result) (error : FA2_1_NFT.Errors.t) =
   match result with
     Success _ -> Test.failwith "This test should fail"
   | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval error))
@@ -124,8 +124,8 @@ let assert_error (result : test_exec_result) (error : FA2_NFT.Errors.t) =
 
 (* Tests for FA2 NFT contract *)
 
-type return = operation list * FA2_NFT.storage
-type main_fn = (FA2_NFT.parameter * FA2_NFT.storage) -> return
+type return = operation list * FA2_1_NFT.storage
+type main_fn = (FA2_1_NFT.parameter * FA2_1_NFT.storage) -> return
 
 (* Transfer *)
 
@@ -146,7 +146,7 @@ let _test_atomic_tansfer_operator_success (main : main_fn) =
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   let () = assert_balances t_addr ((owner2, 1n), (owner2, 2n), (owner3, 3n)) in
   ()
-let test_atomic_tansfer_operator_success = _test_atomic_tansfer_operator_success FA2_NFT.main
+let test_atomic_tansfer_operator_success = _test_atomic_tansfer_operator_success FA2_1_NFT.main
 
 (* 1.1. transfer successful owner *)
 let _test_atomic_tansfer_owner_success (main : main_fn) =
@@ -164,7 +164,7 @@ let _test_atomic_tansfer_owner_success (main : main_fn) =
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   let () = assert_balances t_addr ((owner2, 1n), (owner2, 2n), (owner3, 3n)) in
   ()
-let test_atomic_tansfer_owner_success = _test_atomic_tansfer_owner_success FA2_NFT.main
+let test_atomic_tansfer_owner_success = _test_atomic_tansfer_owner_success FA2_1_NFT.main
 
 (* 2. transfer failure token undefined *)
 let _test_transfer_token_undefined (main : main_fn) = 
@@ -180,8 +180,8 @@ let _test_transfer_token_undefined (main : main_fn) =
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
-  assert_error result FA2_NFT.Errors.undefined_token
-let test_transfer_token_undefined = _test_transfer_token_undefined FA2_NFT.main
+  assert_error result FA2_1_NFT.Errors.undefined_token
+let test_transfer_token_undefined = _test_transfer_token_undefined FA2_1_NFT.main
 
 (* 3. transfer failure incorrect operator *)
 let _test_atomic_transfer_failure_not_operator (main : main_fn) = 
@@ -197,9 +197,9 @@ let _test_atomic_transfer_failure_not_operator (main : main_fn) =
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
-  assert_error result FA2_NFT.Errors.not_operator
+  assert_error result FA2_1_NFT.Errors.not_operator
 let test_atomic_transfer_failure_not_operator 
-  = _test_atomic_transfer_failure_not_operator FA2_NFT.main
+  = _test_atomic_transfer_failure_not_operator FA2_1_NFT.main
 
 (* 4. self transfer *)
 let _test_atomic_tansfer_success_zero_amount_and_self_transfer (main : main_fn) =
@@ -219,7 +219,7 @@ let _test_atomic_tansfer_success_zero_amount_and_self_transfer (main : main_fn) 
   let () = assert_balances t_addr ((owner1, 1n), (owner2, 2n), (owner3, 3n)) in
   ()
 let test_atomic_tansfer_success_zero_amount_and_self_transfer =
-  _test_atomic_tansfer_success_zero_amount_and_self_transfer FA2_NFT.main
+  _test_atomic_tansfer_success_zero_amount_and_self_transfer FA2_1_NFT.main
 
 (* 5. transfer failure transitive operators *)
 let _test_transfer_failure_transitive_operators (main : main_fn) = 
@@ -235,9 +235,9 @@ let _test_transfer_failure_transitive_operators (main : main_fn) =
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
-  assert_error result FA2_NFT.Errors.not_operator
+  assert_error result FA2_1_NFT.Errors.not_operator
 let test_transfer_failure_transitive_operators = 
-  _test_transfer_failure_transitive_operators FA2_NFT.main
+  _test_transfer_failure_transitive_operators FA2_1_NFT.main
 
 (* Balance of *)
 
@@ -248,7 +248,7 @@ let _test_empty_transfer_and_balance_of (main : main_fn) =
   let callback_contract = Test.to_contract callback_addr in
 
   let balance_of_requests = {
-    requests = ([] : FA2_NFT.Balance_of.request list);
+    requests = ([] : FA2_1_NFT.Balance_of.request list);
     callback = callback_contract;
   } in
 
@@ -258,7 +258,7 @@ let _test_empty_transfer_and_balance_of (main : main_fn) =
 
   let callback_storage = Test.get_storage callback_addr in
   assert (callback_storage = ([] : nat list))
-let test_empty_transfer_and_balance_of = _test_empty_transfer_and_balance_of FA2_NFT.main
+let test_empty_transfer_and_balance_of = _test_empty_transfer_and_balance_of FA2_1_NFT.main
 
 (* 7. balance of failure token undefined *)
 let _test_balance_of_token_undefines (main : main_fn) = 
@@ -281,8 +281,8 @@ let _test_balance_of_token_undefines (main : main_fn) =
   let (t_addr,_,_) = Test.originate main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Balance_of balance_of_requests) 0tez in
-  assert_error result FA2_NFT.Errors.undefined_token
-let test_balance_of_token_undefines = _test_balance_of_token_undefines FA2_NFT.main
+  assert_error result FA2_1_NFT.Errors.undefined_token
+let test_balance_of_token_undefines = _test_balance_of_token_undefines FA2_1_NFT.main
 
 (* 8. duplicate balance_of requests *)
 let _test_balance_of_requests_with_duplicates (main : main_fn) = 
@@ -309,7 +309,7 @@ let _test_balance_of_requests_with_duplicates (main : main_fn) =
   let callback_storage = Test.get_storage callback_addr in
   assert (callback_storage = ([1n; 1n; 1n; 0n]))
 let test_balance_of_requests_with_duplicates 
-  = _test_balance_of_requests_with_duplicates FA2_NFT.main
+  = _test_balance_of_requests_with_duplicates FA2_1_NFT.main
 
 (* 9. 0 balance if does not hold any tokens (not in ledger) *)
 let _test_balance_of_0_balance_if_address_does_not_hold_tokens (main : main_fn) = 
@@ -336,7 +336,7 @@ let _test_balance_of_0_balance_if_address_does_not_hold_tokens (main : main_fn) 
     let callback_storage = Test.get_storage callback_addr in
     assert (callback_storage = ([1n; 1n; 0n]))
 let test_balance_of_0_balance_if_address_does_not_hold_tokens = 
-  _test_balance_of_0_balance_if_address_does_not_hold_tokens FA2_NFT.main
+  _test_balance_of_0_balance_if_address_does_not_hold_tokens FA2_1_NFT.main
 
 (* Update operators *)
 
@@ -356,7 +356,7 @@ let _test_update_operator_remove_operator_and_transfer (main : main_fn) =
         owner    = owner1;
         operator = op1;
         token_id = 1n;
-      }:FA2_NFT.Update.unit_update)
+      }:FA2_1_NFT.Update.unit_update)
     ]) 0tez in
 
   let () = Test.set_source op1 in
@@ -365,9 +365,9 @@ let _test_update_operator_remove_operator_and_transfer (main : main_fn) =
   ]
   in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
-  assert_error result FA2_NFT.Errors.not_operator
+  assert_error result FA2_1_NFT.Errors.not_operator
 let test_update_operator_remove_operator_and_transfer = 
-  _test_update_operator_remove_operator_and_transfer FA2_NFT.main
+  _test_update_operator_remove_operator_and_transfer FA2_1_NFT.main
 
 (* 10.1. Remove operator & do transfer - failure *)
 let _test_update_operator_remove_operator_and_transfer1 (main : main_fn) = 
@@ -384,7 +384,7 @@ let _test_update_operator_remove_operator_and_transfer1 (main : main_fn) =
         owner    = owner4;
         operator = op1;
         token_id = 4n;
-      }:FA2_NFT.Update.unit_update)
+      }:FA2_1_NFT.Update.unit_update)
     ]) 0tez in
 
   let storage = Test.get_storage t_addr in
@@ -392,7 +392,7 @@ let _test_update_operator_remove_operator_and_transfer1 (main : main_fn) =
   let operator_tokens = Option.unopt operator_tokens in
   assert (operator_tokens = Set.literal [op1])
 let test_update_operator_remove_operator_and_transfer1 = 
-  _test_update_operator_remove_operator_and_transfer1 FA2_NFT.main
+  _test_update_operator_remove_operator_and_transfer1 FA2_1_NFT.main
 
 
 (* 11. Add operator & do transfer - success *)
@@ -411,7 +411,7 @@ let _test_update_operator_add_operator_and_transfer (main : main_fn) =
         owner    = owner1;
         operator = op3;
         token_id = 1n;
-      }:FA2_NFT.Update.unit_update)
+      }:FA2_1_NFT.Update.unit_update)
     ]) 0tez in
 
   let () = Test.set_source op3 in
@@ -422,7 +422,7 @@ let _test_update_operator_add_operator_and_transfer (main : main_fn) =
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   ()
 let test_update_operator_add_operator_and_transfer = 
-  _test_update_operator_add_operator_and_transfer FA2_NFT.main
+  _test_update_operator_add_operator_and_transfer FA2_1_NFT.main
 
 (* 11.1. Add operator & do transfer - success *)
 let _test_update_operator_add_operator_and_transfer1 (main : main_fn) = 
@@ -440,7 +440,7 @@ let _test_update_operator_add_operator_and_transfer1 (main : main_fn) =
         owner    = owner4;
         operator = op3;
         token_id = 4n;
-      }:FA2_NFT.Update.unit_update)
+      }:FA2_1_NFT.Update.unit_update)
     ]) 0tez in
 
   let () = Test.set_source op3 in
@@ -451,7 +451,7 @@ let _test_update_operator_add_operator_and_transfer1 (main : main_fn) =
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   ()
 let test_update_operator_add_operator_and_transfer1 = 
-  _test_update_operator_add_operator_and_transfer1 FA2_NFT.main
+  _test_update_operator_add_operator_and_transfer1 FA2_1_NFT.main
 
 let _test_only_sender_manage_operators (main : main_fn) = 
   let initial_storage, owners, operators = get_initial_storage () in
@@ -468,9 +468,9 @@ let _test_only_sender_manage_operators (main : main_fn) =
         owner    = owner1;
         operator = op3;
         token_id = 1n;
-      }:FA2_NFT.Update.unit_update)
+      }:FA2_1_NFT.Update.unit_update)
     ]) 0tez in
 
-  assert_error result FA2_NFT.Errors.only_sender_manage_operators
+  assert_error result FA2_1_NFT.Errors.only_sender_manage_operators
 
-let test_only_sender_manage_operators = _test_only_sender_manage_operators FA2_NFT.main
+let test_only_sender_manage_operators = _test_only_sender_manage_operators FA2_1_NFT.main

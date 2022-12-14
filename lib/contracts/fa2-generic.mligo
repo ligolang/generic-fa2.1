@@ -10,7 +10,6 @@
 #import "../entrypoints/transfer.mligo" "Transfer"
 #import "../entrypoints/balance_of.mligo" "Balance_of"
 #import "../entrypoints/update.mligo" "Update"
-#import "../entrypoints/approve.mligo" "Approve"
 
 #import "views.mligo" "Views"
 

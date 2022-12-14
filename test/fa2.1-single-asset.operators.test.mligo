@@ -1,4 +1,4 @@
-#import "../lib/contracts/fa2-single-asset.mligo" "FA2_single_asset"
+#import "../lib/contracts/fa2.1-single-asset.mligo" "FA2_1_single_asset"
 #import "helpers/list.mligo" "List_helper"
 
 module Callback = struct
@@ -58,7 +58,7 @@ let get_initial_storage (a, b, c : nat * nat * nat) =
     ])
   in
 
-  let approvals = (Big_map.empty : FA2_single_asset.Approvals.t)
+  let approvals = (Big_map.empty : FA2_1_single_asset.Approvals.t)
   in
   
   let token_info = (Map.empty: (string, bytes) map) in
@@ -71,7 +71,7 @@ let get_initial_storage (a, b, c : nat * nat * nat) =
   ])
   in
 
-  let metadata = FA2_single_asset.Metadata.init() in
+  let metadata = FA2_1_single_asset.Metadata.init() in
 
   let initial_storage = {
       ledger         = ledger;
@@ -85,7 +85,7 @@ let get_initial_storage (a, b, c : nat * nat * nat) =
   initial_storage, owners, ops
 
 let assert_balances 
-  (contract_address : (FA2_single_asset.parameter, FA2_single_asset.storage) typed_address ) 
+  (contract_address : (FA2_1_single_asset.parameter, FA2_1_single_asset.storage) typed_address ) 
   (a, b, c : (address * nat) * (address * nat) * (address * nat)) = 
   let (owner1, balance1) = a in
   let (owner2, balance2) = b in
@@ -121,7 +121,7 @@ let test_atomic_tansfer_success =
   ]
   in
   let () = Test.set_source op1 in 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   let () = assert_balances t_addr ((owner1, 8n), (owner2, 7n), (owner3, 15n)) in
@@ -140,12 +140,12 @@ let test_atomic_transfer_failure_not_operator =
   ]
   in
   let () = Test.set_source op3 in 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
   match result with
     Success _ -> failwith "This test should fail"
-  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_single_asset.Errors.not_operator))
+  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_1_single_asset.Errors.not_operator))
   | Fail _ -> failwith "invalid test failure"
 
 (* 3. transfer failure insuffient balance *)
@@ -161,12 +161,12 @@ let test_atomic_transfer_failure_not_suffient_balance =
   ]
   in
   let () = Test.set_source op1 in 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
   match result with
     Success _ -> failwith "This test should fail"
-  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_single_asset.Errors.ins_balance))
+  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_1_single_asset.Errors.ins_balance))
   | Fail _ -> failwith "invalid test failure"
 
 (* 4. transfer successful 0 amount & self transfer *)
@@ -182,7 +182,7 @@ let test_atomic_tansfer_success_zero_amount_and_self_transfer =
   ]
   in
   let () = Test.set_source op1 in 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   let () = assert_balances t_addr ((owner1, 10n), (owner2, 10n), (owner3, 10n)) in
@@ -200,12 +200,12 @@ let test_transfer_failure_transitive_operators =
   ]
   in
   let () = Test.set_source op2 in 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
   match result with
     Success _ -> failwith "This test should fail"
-  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_single_asset.Errors.not_operator))
+  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_1_single_asset.Errors.not_operator))
   | Fail _ -> failwith "invalid test failure"
 
 (* Balance of *)
@@ -217,11 +217,11 @@ let test_empty_transfer_and_balance_of =
   let callback_contract = Test.to_contract callback_addr in
 
   let balance_of_requests = {
-    requests = ([] : FA2_single_asset.Balance_of.request list);
+    requests = ([] : FA2_1_single_asset.Balance_of.request list);
     callback = callback_contract;
   } in
 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Balance_of balance_of_requests) 0tez in
   
@@ -247,7 +247,7 @@ let test_balance_of_requests_with_duplicates =
     callback = callback_contract;
   } in
 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Balance_of balance_of_requests) 0tez in
 
@@ -273,7 +273,7 @@ let test_balance_of_0_balance_if_address_does_not_hold_tokens =
     callback = callback_contract;
   } in
 
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Balance_of balance_of_requests) 0tez in
 
@@ -289,7 +289,7 @@ let test_update_operator_remove_operator_and_transfer =
   let owner2 = List_helper.nth_exn 1 owners in
   let owner3 = List_helper.nth_exn 2 owners in
   let op1    = List_helper.nth_exn 0 operators in
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
 
   let () = Test.set_source owner1 in 
@@ -299,7 +299,7 @@ let test_update_operator_remove_operator_and_transfer =
         owner    = owner1;
         operator = op1;
         token_id = 0n;
-      }:FA2_single_asset.Update.unit_update)
+      }:FA2_1_single_asset.Update.unit_update)
     ]) 0tez in
 
   let () = Test.set_source op1 in
@@ -311,7 +311,7 @@ let test_update_operator_remove_operator_and_transfer =
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
   match result with
     Success _ -> failwith "This test should fail"
-  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_single_asset.Errors.not_operator))
+  | Fail (Rejected (err, _))  -> assert (Test.michelson_equal err (Test.eval FA2_1_single_asset.Errors.not_operator))
   | Fail _ -> failwith "invalid test failure"
 
 (* 10. Add operator & do transfer - success *)
@@ -321,7 +321,7 @@ let test_update_operator_add_operator_and_transfer =
   let owner2 = List_helper.nth_exn 1 owners in
   let owner3 = List_helper.nth_exn 2 owners in
   let op3    = List_helper.nth_exn 2 operators in
-  let (t_addr,_,_) = Test.originate FA2_single_asset.main initial_storage 0tez in
+  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
   let contr = Test.to_contract t_addr in
 
   let () = Test.set_source owner1 in 
@@ -331,7 +331,7 @@ let test_update_operator_add_operator_and_transfer =
         owner    = owner1;
         operator = op3;
         token_id = 0n;
-      }:FA2_single_asset.Update.unit_update)
+      }:FA2_1_single_asset.Update.unit_update)
     ]) 0tez in
 
   let () = Test.set_source owner2 in 
@@ -341,7 +341,7 @@ let test_update_operator_add_operator_and_transfer =
         owner    = owner2;
         operator = op3;
         token_id = 0n;
-      }:FA2_single_asset.Update.unit_update);
+      }:FA2_1_single_asset.Update.unit_update);
     ]) 0tez in
 
   let () = Test.set_source op3 in

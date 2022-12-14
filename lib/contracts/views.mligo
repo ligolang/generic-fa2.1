@@ -16,8 +16,10 @@ let balance_of
 
 let total_supply 
          (type a l) 
+         (make: l -> l ledger_module) 
          ((token_id, storage) : (nat * (a,l) storage)) 
          : nat =
    if Storage.token_exist storage token_id 
-   then 1n 
+   then let ledger_module = make storage.ledger in
+        ledger_module.supply (ledger_module.data, token_id) 
    else 0n

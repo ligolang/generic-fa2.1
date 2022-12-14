@@ -30,4 +30,4 @@ let main : parameter * storage -> operation list * storage =
    FA2.Views.balance_of Ledger.Single_asset.ledger_module
 
 [@view] let total_supply : (Token.t * storage) -> nat =
-   FA2.Views.total_supply
+   FA2.Views.total_supply Ledger.Single_asset.ledger_module
