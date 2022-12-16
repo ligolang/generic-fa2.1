@@ -19,7 +19,7 @@ An extension for a given kind of contract can be done seamlessly. For instance, 
 list of token identifiers for the NFT this can be done just specifying the extension:
 
 ```ligolang
-type parametric_parameter = FA2.parameter
+type parametric_parameter = FA2_1.parameter
 type parametric_storage = Storage.t
 
 type extension = Token.t set
@@ -38,7 +38,7 @@ let main : parameter * storage -> operation list * storage =
    FA2.Views.balance_of Ledger.NFT.ledger_module
 
 [@view] let total_supply : (Token.t * storage) -> nat =
-   FA2.Views.total_supply
+   FA2_1.Views.total_supply
 ```
 
 ### Extending parameters
@@ -46,7 +46,7 @@ let main : parameter * storage -> operation list * storage =
 The parameters can be also revisited and extended.
 
 ```ligolang
-type parametric_parameter = FA2.parameter
+type parametric_parameter = FA2_1.parameter
 type parametric_storage = Storage.t
 
 type extension = Foo of nat
@@ -59,7 +59,7 @@ let extension (e:extension) (s:storage) (ledger:Ledger.NFT.t): operation list * 
     [], s
 
 let main : parameter * storage -> operation list * storage = 
-   FA2.main Ledger.NFT.ledger_module extension
+   FA2_1.main Ledger.NFT.ledger_module extension
 
 (*
    Views corner
