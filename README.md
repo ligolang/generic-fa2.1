@@ -28,14 +28,14 @@ type parameter = unit parametric_parameter
 type storage = (extension, Ledger.NFT.k, Ledger.NFT.v) parametric_storage
 
 let main : parameter * storage -> operation list * storage = 
-   FA2.main Ledger.NFT.ledger_module (fun _ s _ -> [],s)
+   FA2_1.main Ledger.NFT.ledger_module (fun _ s _ -> [],s)
 
 (*
    Views corner
 *)
 
 [@view] let balance_of : ((address * Token.t) * storage) -> nat =
-   FA2.Views.balance_of Ledger.NFT.ledger_module
+   FA2_1.Views.balance_of Ledger.NFT.ledger_module
 
 [@view] let total_supply : (Token.t * storage) -> nat =
    FA2_1.Views.total_supply
@@ -66,10 +66,10 @@ let main : parameter * storage -> operation list * storage =
 *)
 
 [@view] let balance_of : ((address * Token.t) * storage) -> nat =
-   FA2.Views.balance_of Ledger.NFT.ledger_module
+   FA2_1.Views.balance_of Ledger.NFT.ledger_module
 
 [@view] let total_supply : (Token.t * storage) -> nat =
-   FA2.Views.total_supply
+   FA2_1.Views.total_supply
 ```
 
 Finally you can extend the storate datatype and the parameter type.
