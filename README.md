@@ -25,7 +25,7 @@ type parametric_storage = Storage.t
 type extension = Token.t set
 
 type parameter = unit parametric_parameter
-type storage = (extension, Ledger.NFT.k, Ledger.NFT.v) parametric_storage
+type storage = (extension, Ledger.NFT.l) parametric_storage
 
 let main : parameter * storage -> operation list * storage = 
    FA2_1.main Ledger.NFT.ledger_module (fun _ s _ -> [],s)
@@ -52,7 +52,7 @@ type parametric_storage = Storage.t
 type extension = Foo of nat
 
 type parameter = extension parametric_parameter
-type storage = (unit, Ledger.NFT.k, Ledger.NFT.v) parametric_storage
+type storage = (unit, Ledger.NFT.l) parametric_storage
 
 let extension (e:extension) (s:storage) (ledger:Ledger.NFT.t): operation list * storage = 
     (* do the job here ... *)
