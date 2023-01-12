@@ -1,21 +1,24 @@
+**WARNING: This library is a beta, so use it cautiously**
+
 # Generic FA2 and FA2.1
 
 This module is an implementation of the last [FA2.1 proposition](https://hackmd.io/eOQdbL1MRlW62M6l6Tjp1Q#).
 
 The current implementation covers:
+
 - multi-asset,
 - single-asset and
 - NFT.
 
 ## Constraints
 
-The code has been designed for the protocol LIMA. 
+The code has been designed for the protocol LIMA.
 
 ## Extending the contract
 
 ### Adding information to the storage
 
-An extension for a given kind of contract can be done seamlessly. For instance, you want to add a 
+An extension for a given kind of contract can be done seamlessly. For instance, you want to add a
 list of token identifiers for the NFT this can be done just specifying the extension:
 
 ```ligolang
@@ -27,7 +30,7 @@ type extension = Token.t set
 type parameter = unit parametric_parameter
 type storage = (extension, Ledger.NFT.l) parametric_storage
 
-let main : parameter * storage -> operation list * storage = 
+let main : parameter * storage -> operation list * storage =
    FA2_1.main Ledger.NFT.ledger_module (fun _ s _ -> [],s)
 
 (*
@@ -54,11 +57,11 @@ type extension = Foo of nat
 type parameter = extension parametric_parameter
 type storage = (unit, Ledger.NFT.l) parametric_storage
 
-let extension (e:extension) (s:storage) (ledger:Ledger.NFT.t): operation list * storage = 
+let extension (e:extension) (s:storage) (ledger:Ledger.NFT.t): operation list * storage =
     (* do the job here ... *)
     [], s
 
-let main : parameter * storage -> operation list * storage = 
+let main : parameter * storage -> operation list * storage =
    FA2_1.main Ledger.NFT.ledger_module extension
 
 (*
@@ -78,7 +81,7 @@ Finally you can extend the storate datatype and the parameter type.
 
 Contracts uses the same code but specific behaviors are given thanks to a record type (kind of module)
 
-## LICENSE 
+## LICENSE
 
 MIT License
 
