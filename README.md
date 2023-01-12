@@ -1,5 +1,7 @@
 **WARNING: This library is a beta, so use it cautiously**
 
+**NOTE: Tests for the new features (tickets, events, etc.) will be added soon**
+
 # Generic FA2 and FA2.1
 
 This module is an implementation of the last [FA2.1 proposition](https://hackmd.io/eOQdbL1MRlW62M6l6Tjp1Q#).
