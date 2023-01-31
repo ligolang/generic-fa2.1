@@ -19,7 +19,7 @@ type parametric_storage = Storage.t
 type parameter = unit parametric_parameter
 type storage = (unit, Ledger.NFT.l) parametric_storage
 
-let main : parameter * storage -> operation list * storage = 
+let main : parameter -> storage -> operation list * storage = 
    FA2.main Ledger.NFT.ledger_module (fun _ s _ -> [],s)
 
 (*

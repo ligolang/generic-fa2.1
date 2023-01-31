@@ -16,7 +16,7 @@ module Callback = struct
 
   type parameter = callback list
 
-  let main ((responses,_):(parameter * storage)) =
+  let main (responses:parameter) (_:storage) =
     let balances = List.map (fun (r : callback) -> r.balance) responses in
     ([]: operation list), balances
 end
@@ -106,6 +106,10 @@ let assert_balances
   in
   ()
 
+let originate_fa2_1 initial_storage =
+  let (addr,_,_) = Test.originate_from_file "../lib/contracts/fa2.1-single-asset.mligo" "main" [] (Test.compile_value initial_storage) 0tez in
+  (Test.cast_address addr : (FA2_1_single_asset.parameter, FA2_1_single_asset.storage) typed_address)
+
 (* Transfer *)
 
 (* 1. transfer successful *)
@@ -121,7 +125,7 @@ let test_atomic_tansfer_success =
   ]
   in
   let () = Test.set_source op1 in 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   let () = assert_balances t_addr ((owner1, 8n), (owner2, 7n), (owner3, 15n)) in
@@ -140,7 +144,7 @@ let test_atomic_transfer_failure_not_operator =
   ]
   in
   let () = Test.set_source op3 in 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
   match result with
@@ -161,7 +165,7 @@ let test_atomic_transfer_failure_not_suffient_balance =
   ]
   in
   let () = Test.set_source op1 in 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
   match result with
@@ -182,7 +186,7 @@ let test_atomic_tansfer_success_zero_amount_and_self_transfer =
   ]
   in
   let () = Test.set_source op1 in 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Transfer transfer_requests) 0tez in
   let () = assert_balances t_addr ((owner1, 10n), (owner2, 10n), (owner3, 10n)) in
@@ -200,7 +204,7 @@ let test_transfer_failure_transitive_operators =
   ]
   in
   let () = Test.set_source op2 in 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let result = Test.transfer_to_contract contr (Transfer transfer_requests) 0tez in
   match result with
@@ -221,7 +225,7 @@ let test_empty_transfer_and_balance_of =
     callback = callback_contract;
   } in
 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Balance_of balance_of_requests) 0tez in
   
@@ -247,7 +251,7 @@ let test_balance_of_requests_with_duplicates =
     callback = callback_contract;
   } in
 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Balance_of balance_of_requests) 0tez in
 
@@ -273,7 +277,7 @@ let test_balance_of_0_balance_if_address_does_not_hold_tokens =
     callback = callback_contract;
   } in
 
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
   let _ = Test.transfer_to_contract_exn contr (Balance_of balance_of_requests) 0tez in
 
@@ -289,7 +293,7 @@ let test_update_operator_remove_operator_and_transfer =
   let owner2 = List_helper.nth_exn 1 owners in
   let owner3 = List_helper.nth_exn 2 owners in
   let op1    = List_helper.nth_exn 0 operators in
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
 
   let () = Test.set_source owner1 in 
@@ -321,7 +325,7 @@ let test_update_operator_add_operator_and_transfer =
   let owner2 = List_helper.nth_exn 1 owners in
   let owner3 = List_helper.nth_exn 2 owners in
   let op3    = List_helper.nth_exn 2 operators in
-  let (t_addr,_,_) = Test.originate FA2_1_single_asset.main initial_storage 0tez in
+  let t_addr = originate_fa2_1 initial_storage in
   let contr = Test.to_contract t_addr in
 
   let () = Test.set_source owner1 in 

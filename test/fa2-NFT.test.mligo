@@ -16,7 +16,7 @@ module Callback = struct
 
   type parameter = callback list
 
-  let main ((responses,_):(parameter * storage)) =
+  let main (responses:parameter) (_:storage) =
     let balances = List.map (fun (r : callback) -> r.balance) responses in
     ([]: operation list), balances
 end
@@ -125,7 +125,7 @@ let assert_error (result : test_exec_result) (error : FA2_NFT.Errors.t) =
 (* Tests for FA2 NFT contract *)
 
 type return = operation list * FA2_NFT.storage
-type main_fn = (FA2_NFT.parameter * FA2_NFT.storage) -> return
+type main_fn = FA2_NFT.parameter -> FA2_NFT.storage -> return
 
 (* Transfer *)
 
