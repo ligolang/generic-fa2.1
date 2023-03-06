@@ -27,7 +27,8 @@ let main
          (type p a l) 
          (make:l -> l ledger_module) 
          (extension:p -> (a,l) storage -> l ledger_module -> operation list * (a,l) storage)
-         ((p,s):(p parameter * (a,l) storage)) 
+         (p:p parameter) 
+         (s:(a,l) storage) 
          : operation list * (a,l) storage = 
    match p with
    | Transfer         p -> Transfer.transfer p s (make s.ledger)

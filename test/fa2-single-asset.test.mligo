@@ -16,7 +16,7 @@ module Callback = struct
 
   type parameter = callback list
 
-  let main ((responses,_):(parameter * storage)) =
+  let main (responses:parameter) (_:storage) =
     let balances = List.map (fun (r : callback) -> r.balance) responses in
     ([]: operation list), balances
 end
